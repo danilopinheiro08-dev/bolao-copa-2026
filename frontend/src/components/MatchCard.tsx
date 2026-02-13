@@ -74,7 +74,6 @@ const TEAM_FLAGS: Record<string, string> = {
   'South Africa': '🇿🇦',
   'Ivory Coast': '🇨🇮',
   'Mali': '🇲🇱',
-  'Mali': '🇲🇱',
 }
 
 interface MatchCardProps {
@@ -89,7 +88,6 @@ export function MatchCard({ match, onPick, onAISuggest, isLoading }: MatchCardPr
   const now = dayjs()
   const isLive = match.status === 'live'
   const isFinished = match.status === 'finished'
-  const isPassed = now.isAfter(kickoff) && !isFinished
   const isLocked = now.isAfter(kickoff)
 
   return (

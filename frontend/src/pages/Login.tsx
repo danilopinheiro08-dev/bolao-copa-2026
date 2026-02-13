@@ -1,15 +1,38 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../providers/AuthProvider'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Loader2 } from 'lucide-react'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { signInEmail } = useAuth()
+  const { signInEmail, user } = useAuth()
   const [email, setEmail] = useState('test@bolao.com')
   const [password, setPassword] = useState('Test123456!')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard')
+    }
+  }, [user, navigate])
+
+  // Play goal cheer sound on component mount
+  useEffect(() => {
+    const playGoalCheer = async () => {
+      try {
+        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2895/2895-preview.mp3')
+        audio.volume = 0.3
+        await audio.play().catch(() => {
+          // Silently fail if audio can't play (browser autoplay restrictions)
+        })
+      } catch {
+        // Ignore audio errors
+      }
+    }
+    playGoalCheer()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,7 +40,11 @@ export default function Login() {
     setError('')
     try {
       await signInEmail(email, password)
-      navigate('/app/dashboard')
+      // Play success sound
+      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/3025/3025-preview.mp3')
+      audio.volume = 0.3
+      await audio.play().catch(() => {})
+      navigate('/dashboard')
     } catch (err: any) {
       setError(err?.response?.data?.detail || 'Erro ao fazer login')
     } finally {
@@ -25,7 +52,7 @@ export default function Login() {
     }
   }
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-600 to-brand-900 flex items-center justify-center px-4">
@@ -64,9 +91,9 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full px-4 py-2 bg-brand-600 text-white font-bold rounded-lg hover:bg-brand-700 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="w-full bg-brand-600 text-white font-bold py-2 rounded-lg hover:bg-brand-700 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading && <Loader2 size={20} className="animate-spin" />}
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             Entrar
           </button>
         </form>
@@ -80,23 +107,29 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="space-y-2 mb-6">
-          <button
-            onClick={() => window.location.href = `${API_BASE_URL}/auth/google/login`}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold flex items-center justify-center gap-2"
+        <div className="space-y-2">
+          <a
+            href={`${apiBaseUrl}/auth/google/login`}
+            className="block w-full px-4 py-2 border border-gray-300 text-gray-700 font-bold rounded-lg hover:bg-gray-50 transition text-center"
           >
             🔵 Google
-          </button>
-          <button
-            onClick={() => window.location.href = `${API_BASE_URL}/auth/facebook/login`}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold flex items-center justify-center gap-2"
+          </a>
+          <a
+            href={`${apiBaseUrl}/auth/facebook/login`}
+            className="block w-full px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition text-center"
           >
-            📘 Facebook
-          </button>
+            f Facebook
+          </a>
         </div>
 
-        <p className="text-center text-gray-600">
-          Não tem conta? <button onClick={() => navigate('/register')} className="text-brand-600 font-bold hover:underline">Criar conta</button>
+        <p className="text-center mt-6 text-gray-600">
+          Não tem conta?{' '}
+          <button
+            onClick={() => navigate('/register')}
+            className="text-brand-600 font-bold hover:underline"
+          >
+            Criar conta
+          </button>
         </p>
       </div>
     </div>

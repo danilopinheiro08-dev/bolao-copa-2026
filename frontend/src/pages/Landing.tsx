@@ -8,11 +8,11 @@ export default function Landing() {
 
   useEffect(() => {
     if (user) {
-      navigate('/app/dashboard')
+      navigate('/dashboard')
     }
   }, [user, navigate])
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-600 to-brand-900 flex items-center justify-center px-4">
@@ -48,23 +48,23 @@ export default function Landing() {
 
           {/* Social Login */}
           <div className="space-y-2">
-            <button
-              onClick={() => window.location.href = `${API_BASE_URL}/auth/google/login`}
-              className="w-full px-6 py-3 bg-white text-gray-900 font-bold rounded-lg hover:bg-gray-100 transition flex items-center justify-center gap-2"
+            <a
+              href={`${apiBaseUrl}/auth/google/login`}
+              className="block w-full px-6 py-3 bg-white text-gray-800 font-bold rounded-lg hover:bg-gray-100 transition"
             >
               🔵 Google
-            </button>
-            <button
-              onClick={() => window.location.href = `${API_BASE_URL}/auth/facebook/login`}
-              className="w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+            </a>
+            <a
+              href={`${apiBaseUrl}/auth/facebook/login`}
+              className="block w-full px-6 py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition"
             >
-              📘 Facebook
-            </button>
+              f Facebook
+            </a>
           </div>
         </div>
 
         <p className="text-sm opacity-75 mt-8">
-          Feito com ❤️ para a Copa do Mundo 2026
+          © 2026 Bolão Copa. Todos os direitos reservados.
         </p>
       </div>
     </div>

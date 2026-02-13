@@ -1,4 +1,4 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react'
+import { createContext, useContext, ReactNode, useState } from 'react'
 import { useMe, useLogin, useRegister, useLogout } from '../api/hooks'
 import type { User } from '../types'
 
@@ -47,37 +47,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = async () => {
     try {
-      setError(null)
       await logoutMutation.mutateAsync()
-      window.location.href = '/'
+      await refetch()
     } catch (err: any) {
-      const message = err?.response?.data?.detail || err?.message || 'Logout failed'
-      setError(message)
-      throw err
+      console.error('Logout error:', err)
     }
   }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user: user || null,
-        loading,
-        error,
-        signInEmail,
-        signUp,
-        signOut,
-        refreshMe: () => refetch(),
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+  const refreshMe = () => {
+    refetch()
+  }
+
+  const value: AuthContextType = {
+    user: user || null,
+    loading,
+    error,
+    signInEmail,
+    signUp,
+    signOut,
+    refreshMe,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
   const context = useContext(AuthContext)
   if (context === undefined) {
-    throw new Error('useAuth must be used within AuthProvider')
+    throw new Error('useAuth must be used within an AuthProvider')
   }
   return context
 }
