@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     
     # Database
-    DATABASE_URL: str = "postgresql://user:password@localhost:5432/bolao_copa_2026"
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/bolao_copa_2026")
     
     # Redis (optional)
     REDIS_URL: Optional[str] = None
