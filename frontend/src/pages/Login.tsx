@@ -52,7 +52,8 @@ export default function Login() {
     }
   }
 
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+  // Em produção, /api é proxy para backend via Nginx
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-600 to-brand-900 flex items-center justify-center px-4">
