@@ -88,8 +88,8 @@ async def join_group(
     group_id: int,
     join_code: Optional[str] = None,
     request: Request = None,
-    user: Optional[User] = Depends(get_current_user) = None,
-    db: Session = Depends(get_db) = None
+    user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Join a group"""
     if not user:

@@ -18,8 +18,8 @@ async def get_ai_suggestion(
     match_id: int,
     style: str = Query("balanced", regex="^(conservative|balanced|aggressive)$"),
     request: Request = None,
-    user: Optional[User] = Depends(get_current_user) = None,
-    db: Session = Depends(get_db) = None
+    user: Optional[User] = Depends(get_current_user),
+    db: Session = Depends(get_db)
 ):
     """Get AI score suggestion for a match"""
     

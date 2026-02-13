@@ -91,8 +91,8 @@ async def update_match_admin(
 @router.post("/fixtures/import-json")
 async def import_fixtures_json(
     file: UploadFile = File(...),
-    admin: Optional[User] = Depends(require_admin) = None,
-    db: Session = Depends(get_db) = None
+    admin: Optional[User] = Depends(require_admin),
+    db: Session = Depends(get_db)
 ):
     """Admin: Import fixtures from JSON file"""
     
