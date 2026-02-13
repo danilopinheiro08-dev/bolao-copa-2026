@@ -1,0 +1,28 @@
+{
+  "projectName": "bolao-copa-2026",
+  "serviceConfigs": [
+    {
+      "name": "web",
+      "serviceType": "database",
+      "plugin": "postgresql",
+      "variables": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_DB": "railway"
+      }
+    },
+    {
+      "name": "app",
+      "serviceType": "docker",
+      "dockerfile": "Dockerfile",
+      "variables": {
+        "ENVIRONMENT": "production"
+      },
+      "ports": [
+        {
+          "port": 8080,
+          "httpOnly": false
+        }
+      ]
+    }
+  ]
+}

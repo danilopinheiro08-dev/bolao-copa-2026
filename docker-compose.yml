@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: bolao_postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: railway
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Full-stack application (Backend + Frontend + Nginx)
+  app:
+    build: .
+    container_name: bolao_app
+    ports:
+      - "8080:8080"
+    environment:
+      DATABASE_PUBLIC_URL: postgresql://postgres:postgres@postgres:5432/railway
+      VITE_API_BASE_URL: http://localhost:8080/api
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    networks:
+      - bolao_network
+
+  # Optional: PgAdmin for database inspection
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: bolao_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@bolao.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - bolao_network
+
+volumes:
+  postgres_data:
+
+networks:
+  bolao_network:
+    driver: bridge

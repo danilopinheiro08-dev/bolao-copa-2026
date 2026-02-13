@@ -1,21 +1,21 @@
+#!/bin/bash
+# Railway Dockerfile - Otimizado para Railway Platform
+
 # Stage 1: Build Frontend
 FROM node:20-alpine as frontend-builder
 
 WORKDIR /app/frontend
-
-# Copy frontend files
 COPY frontend/package*.json ./
 RUN npm install --legacy-peer-deps
-
 COPY frontend/ ./
 RUN npm run build
 
-# Stage 2: Backend + Nginx
+# Stage 2: Backend + Nginx (Railway)
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies including nginx
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     gcc \
     curl \
@@ -24,33 +24,27 @@ RUN apt-get update && apt-get install -y \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python requirements
+# Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy backend code
+# Copy backend
 COPY app ./app
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-
-# Copy built frontend from builder
+# Copy built frontend
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Configure Nginx
-RUN mkdir -p /etc/nginx/conf.d
+# Setup configs
+RUN mkdir -p /etc/nginx/conf.d /var/log/supervisor
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Configure Supervisor
-RUN mkdir -p /var/log/supervisor
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Expose port
+# Port
 EXPOSE 8080
 
-# Health check
+# Health
 HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
-# Run supervisor to manage both services
+# Run
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
