@@ -75,10 +75,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Trusted Host
+# Trusted Host - Permitir Railway domains
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.example.com"]
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.railway.app",
+        "*.up.railway.app",
+        "*.example.com"
+    ]
 )
 
 # Routes

@@ -59,7 +59,12 @@ class Settings(BaseSettings):
     STRIPE_WEBHOOK_SECRET: Optional[str] = None
     
     # Security
-    CORS_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
+    CORS_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:8000",
+        "https://bolao-copa-2026-production.up.railway.app",
+        "https://bolao-copa-2026.railway.app"
+    ]
     CSRF_PROTECTION_ENABLED: bool = True
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_PER_MINUTE: int = 60
