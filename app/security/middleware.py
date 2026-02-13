@@ -2,7 +2,7 @@ from fastapi import Request, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models import AuditLog
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Tuple, Optional
 import logging
 
 logger = logging.getLogger(__name__)
@@ -106,7 +106,7 @@ def escape_html(value: str) -> str:
     return html.escape(value)
 
 # Rate Limiting helpers
-from typing import Optional
+from typing import Tuple, Optional
 from datetime import datetime, timedelta
 
 class RateLimitChecker:
@@ -121,7 +121,7 @@ class RateLimitChecker:
         identifier: str,
         limit: int = 60,
         window_seconds: int = 60
-    ) -> tuple[bool, int, int]:
+    ) -> Tuple[bool, int, int]:
         """
         Check if request exceeds rate limit
         Returns: (is_allowed, current_count, remaining)
