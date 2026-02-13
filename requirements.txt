@@ -22,4 +22,6 @@ pytz==2023.3.post1
 pydantic-extra-types==2.4.0
 pytest==7.4.3
 pytest-asyncio==0.21.1
-pytest-httpx==0.25.2
+pytest-httpx==0.36.0
+apscheduler==3.10.4
+pyjwt==2.8.1
