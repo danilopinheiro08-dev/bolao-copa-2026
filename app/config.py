@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from typing import Optional
 import os
 
@@ -12,8 +13,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"  # development, staging, production
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     
-    # Database
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/bolao_copa_2026")
+    # Database - Railway injecta DATABASE_URL como env var
+    DATABASE_URL: str = Field(default="postgresql://user:password@localhost:5432/bolao_copa_2026")
     
     # Redis (optional)
     REDIS_URL: Optional[str] = None
@@ -75,5 +76,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         case_sensitive = True
         extra = "ignore"
+        # Railway e outras plataformas de deploy injetam DATABASE_URL automaticamente
+        # Pydantic BaseSettings lê de variáveis de ambiente automaticamente
 
 settings = Settings()
