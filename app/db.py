@@ -33,6 +33,22 @@ def get_db():
         db.close()
 
 def init_db():
-    """Initialize database - create all tables"""
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database initialized")
+    """Initialize database - create all tables with retry logic"""
+    import time
+    max_retries = 5
+    retry_delay = 2
+    
+    for attempt in range(max_retries):
+        try:
+            Base.metadata.create_all(bind=engine)
+            logger.info("Database initialized successfully")
+            return
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"Database init attempt {attempt + 1}/{max_retries} failed: {e}")
+                logger.info(f"Retrying in {retry_delay}s...")
+                time.sleep(retry_delay)
+            else:
+                logger.warning(f"Database init failed after {max_retries} attempts: {e}")
+                logger.info("App will continue - database tables will be created on first request")
+                return
