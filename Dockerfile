@@ -31,19 +31,21 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY app ./app
 
-# Create non-root user
-RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
-
 # Copy built frontend from builder
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Configure Nginx
-RUN mkdir -p /etc/nginx/conf.d
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove default nginx config and add ours
+RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/app.conf
 
 # Configure Supervisor
-RUN mkdir -p /var/log/supervisor
+RUN mkdir -p /var/log/supervisor /var/log/nginx /var/run
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Set permissions
+RUN chmod -R 755 /app && \
+    chmod -R 755 /var/log/supervisor && \
+    chmod -R 755 /var/log/nginx
 
 # Expose port
 EXPOSE 8080
@@ -53,4 +55,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
     CMD curl -f http://localhost:8080/health || exit 1
 
 # Run supervisor to manage both services
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+CMD ["/usr/bin/supervisord", "-n", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
