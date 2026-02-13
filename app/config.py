@@ -12,11 +12,8 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"  # development, staging, production
     SECRET_KEY: str = "dev-secret-key-change-in-production"
     
-    # Database - Railway injecta DATABASE_PUBLIC_URL como env var
-    DATABASE_URL: str = Field(
-        default="postgresql://user:password@localhost:5432/bolao_copa_2026",
-        alias="DATABASE_PUBLIC_URL"  # Railway usa este nome
-    )
+    # Database - Railway injecta DATABASE_URL como env var
+    DATABASE_URL: str = "postgresql://user:password@localhost:5432/bolao_copa_2026"
     
     # Redis (optional)
     REDIS_URL: Optional[str] = None
