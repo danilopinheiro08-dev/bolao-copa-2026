@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
+# Force rebuild: httpx 0.28.0, pytest-httpx 0.37.0
 COPY requirements.txt .
 
 # Install Python dependencies
