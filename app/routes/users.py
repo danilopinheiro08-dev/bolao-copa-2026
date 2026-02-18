@@ -62,34 +62,34 @@ async def get_user_stats(
     if not user:
         raise HTTPException(status_code=401, detail="Not authenticated")
     
-    from app.models import Prediction
+    from app.models import Prediction, GroupMember
     from sqlalchemy import func
-    
-    # Count predictions
-    total_predictions = db.query(Prediction).filter(Prediction.user_id == user.id).count()
-    
-    # Count exact matches
-    exact_matches = db.query(Prediction).filter(
-        Prediction.user_id == user.id,
-        Prediction.score_details['exact'].astext == 'true'
-    ).count()
-    
-    # Sum points
+
+    # Fetch all user predictions (works with SQLite and PostgreSQL)
+    user_predictions = db.query(Prediction).filter(Prediction.user_id == user.id).all()
+
+    total_predictions = len(user_predictions)
+
+    # Count exact matches using Python (avoids JSON path queries that SQLite doesn't support)
+    exact_matches = sum(
+        1 for p in user_predictions
+        if p.score_details and p.score_details.get("exact") is True
+    )
+
+    # Sum points via SQL (works on all backends)
     total_points = db.query(func.sum(Prediction.points_awarded)).filter(
         Prediction.user_id == user.id
     ).scalar() or 0
-    
-    # Count groups
-    from app.models import GroupMember
+
     group_count = db.query(GroupMember).filter(
         GroupMember.user_id == user.id,
-        GroupMember.is_active == True
+        GroupMember.is_active == True,
     ).count()
-    
+
     return {
         "total_predictions": total_predictions,
         "exact_matches": exact_matches,
-        "total_points": total_points,
+        "total_points": int(total_points),
         "groups_count": group_count,
     }
 

@@ -194,11 +194,14 @@ class PredictionService:
     
     @staticmethod
     def is_match_locked(match: Match, lock_minutes: int = 10) -> bool:
-        """Check if match prediction is locked"""
+        """Check if match prediction is locked (10 minutes before kickoff)."""
         now = datetime.now(timezone.utc)
         kickoff = match.kickoff_at_utc
-        
-        # Lock if within lock_minutes of kickoff or match has started
+
+        # SQLite stores datetimes without timezone info; normalise to UTC
+        if kickoff.tzinfo is None:
+            kickoff = kickoff.replace(tzinfo=timezone.utc)
+
         lock_threshold = kickoff - timedelta(minutes=lock_minutes)
         return now >= lock_threshold
     
@@ -293,17 +296,47 @@ class ScoringService:
         return points, details
     
     @staticmethod
-    def get_tiebreaker_order(users_with_points: List[Tuple[int, int]]) -> List[int]:
+    def get_tiebreaker_order(
+        users_with_points: List[Tuple[int, int]],
+        db: Optional[Session] = None,
+    ) -> List[int]:
         """
         Sort users by tiebreaker rules.
+
         Input: [(user_id, total_points), ...]
-        Returns: sorted list of user_ids
+        Returns: sorted list of user_ids (best first)
+
+        Tiebreaker criteria (in order):
+          1. Total points (desc)
+          2. Exact score count (desc)
+          3. Correct result count (desc)
+          4. Absolute goal-difference error sum (asc — lower is better)
         """
-        # TODO: Implement full tiebreaker logic
-        # 1. Exact matches count
-        # 2. Result accuracy count
-        # 3. Absolute error sum
-        # 4. First to predict
-        
-        # For now, just return by points
-        return [uid for uid, _ in sorted(users_with_points, key=lambda x: x[1], reverse=True)]
+        if not db:
+            # Fallback: sort by points only
+            return [uid for uid, _ in sorted(users_with_points, key=lambda x: x[1], reverse=True)]
+
+        enriched = []
+        for user_id, total_points in users_with_points:
+            preds = db.query(Prediction).filter(Prediction.user_id == user_id).all()
+            exact_count = 0
+            result_count = 0
+            abs_error_sum = 0
+
+            for pred in preds:
+                details = pred.score_details or {}
+                if details.get("exact"):
+                    exact_count += 1
+                if details.get("result"):
+                    result_count += 1
+                # Absolute error = |home_diff_pred - home_diff_actual|
+                if pred.match and pred.match.home_score is not None:
+                    abs_error_sum += abs(
+                        (pred.home_pred - pred.away_pred)
+                        - (pred.match.home_score - pred.match.away_score)
+                    )
+
+            enriched.append((user_id, total_points, exact_count, result_count, abs_error_sum))
+
+        enriched.sort(key=lambda x: (-x[1], -x[2], -x[3], x[4]))
+        return [row[0] for row in enriched]

@@ -78,7 +78,7 @@ async def update_match_admin(
         resource_type="match",
         resource_id=match_id,
         request=request,
-        details=update_data.dict()
+        details=update_data.model_dump()
     )
     
     return {

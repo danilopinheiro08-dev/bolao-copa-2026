@@ -118,7 +118,7 @@ async def login(
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": UserResponse.from_orm(user).dict()
+        "user": UserResponse.model_validate(user).model_dump(mode="json"),
     }
 
 @router.post("/password-reset")

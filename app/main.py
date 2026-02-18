@@ -1,7 +1,9 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from sqlalchemy import text
 from app.config import settings
 from app.db import init_db
 from app.routes import auth, predictions, groups, users, admin, ai
@@ -19,11 +21,26 @@ logger = logging.getLogger(__name__)
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    """Application lifespan: startup and shutdown logic."""
+    logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
+    init_db()
+    if settings.ENABLE_JOBS:
+        from app.jobs.scheduler import start_scheduler
+        start_scheduler()
+        logger.info("Background jobs started")
+    yield
+    logger.info("Shutting down...")
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 app.state.limiter = limiter
@@ -75,15 +92,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Trusted Host - Permitir Railway domains
+# Trusted Host - Permitir Railway domains + testserver (pytest TestClient)
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=[
         "localhost",
         "127.0.0.1",
+        "testserver",   # FastAPI TestClient hostname
         "*.railway.app",
         "*.up.railway.app",
-        "*.example.com"
+        "*.example.com",
     ]
 )
 
@@ -102,9 +120,9 @@ async def health_check():
     from app.db import engine
     
     try:
-        # Test DB connection
+        # Test DB connection (SQLAlchemy 2.x requires text())
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
         db_status = "ok"
     except Exception as e:
         logger.error(f"DB health check failed: {e}")
@@ -126,27 +144,6 @@ async def status_check():
         "environment": settings.ENVIRONMENT,
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
-
-# Startup
-@app.on_event("startup")
-async def startup_event():
-    """Initialize app on startup"""
-    logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
-    
-    # Initialize DB
-    init_db()
-    
-    # Start jobs if enabled
-    if settings.ENABLE_JOBS:
-        from app.jobs.scheduler import start_scheduler
-        start_scheduler()
-        logger.info("Background jobs started")
-
-# Shutdown
-@app.on_event("shutdown")
-async def shutdown_event():
-    """Cleanup on shutdown"""
-    logger.info("Shutting down...")
 
 # 404
 @app.get("/{path_name:path}", status_code=404)

@@ -188,10 +188,10 @@ async def get_my_predictions(
     for pred in predictions:
         match = db.query(Match).filter(Match.id == pred.match_id).first()
         result.append({
-            "prediction": PredictionResponse.from_orm(pred).dict(),
-            "match": MatchResponse.from_orm(match).dict() if match else None,
+            "prediction": PredictionResponse.model_validate(pred).model_dump(mode="json"),
+            "match": MatchResponse.model_validate(match).model_dump(mode="json") if match else None,
         })
-    
+
     return result
 
 @router.get("/my/upcoming")
@@ -206,4 +206,4 @@ async def get_my_upcoming_matches(
     
     matches = PredictionService.get_upcoming_matches_without_prediction(db, user.id, limit)
     
-    return [MatchResponse.from_orm(m).dict() for m in matches]
+    return [MatchResponse.model_validate(m).model_dump(mode="json") for m in matches]

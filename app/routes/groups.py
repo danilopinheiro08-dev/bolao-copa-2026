@@ -77,7 +77,7 @@ async def get_group(
             })
     
     return {
-        **GroupResponse.from_orm(group).dict(),
+        **GroupResponse.model_validate(group).model_dump(mode="json"),
         "owner_id": group.owner_id,
         "members": member_responses,
         "member_count": len(member_responses),
