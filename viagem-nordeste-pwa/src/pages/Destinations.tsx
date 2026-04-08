@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import { Star, MapPin, Plus } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import TideWidget from '../components/TideWidget'
+import type { TideCity } from '../services/tideService'
 
 const CITY_FILTERS = ['Todos', 'Natal', 'Pipa', 'João Pessoa']
 const CATEGORY_FILTERS = ['Todos', 'Praia', 'Passeio', 'Natureza', 'Cultura', 'Hotel']
+
+// Mostra marés do dia atual (ou próximo dia da viagem) para praias
+const TODAY_DATE = '2026-04-10' // primeiro dia da viagem como default
 
 export default function Destinations() {
   const { destinations, showToast } = useStore()
@@ -64,10 +69,16 @@ export default function Destinations() {
         {['Natal', 'Pipa', 'João Pessoa'].map((city) => {
           const cityItems = filtered.filter((d) => d.city === city)
           if (!cityItems.length) return null
+          const hasBeaches = cityItems.some((d) => d.category === 'Praia')
+          const showTides = hasBeaches && (catFilter === 'Todos' || catFilter === 'Praia')
           return (
             <div key={city}>
               {cityFilter === 'Todos' && (
                 <div className="list-section-header">{city}</div>
+              )}
+              {/* Marés para cidades com praias */}
+              {showTides && (
+                <TideWidget date={TODAY_DATE} city={city as TideCity} />
               )}
               <div className="feed-section" style={{ margin: '0 var(--space-5) var(--space-4)', borderRadius: 'var(--radius-md)' }}>
                 {cityItems.map((d, i) => (

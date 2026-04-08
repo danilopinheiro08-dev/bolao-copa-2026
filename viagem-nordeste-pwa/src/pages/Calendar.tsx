@@ -1,6 +1,10 @@
 import { useState } from 'react'
 import { Plus, CalendarDays, X, Clock, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
+import TideWidget from '../components/TideWidget'
+import ConfirmModal from '../components/ConfirmModal'
+import { getCityForDate } from '../services/tideService'
+import { notifyAll } from '../services/notificationService'
 
 /* ============================================================
    TRIP DAYS — April 10–19, 2026 · JPA → Natal → Pipa → JP → JPA
@@ -23,24 +27,29 @@ const TRIP_DAYS = [
    ADD EVENT MODAL (Bottom Sheet)
    ============================================================ */
 
-function AddEventModal({ onClose }: { onClose: () => void }) {
-  const { travelers, currentTraveler, addToCalendar, selectedDate } = useStore()
+interface PendingEvent {
+  title: string
+  subtitle: string
+  time: string
+  travelerId: string
+}
+
+function AddEventModal({
+  onClose,
+  onReadyToConfirm,
+}: {
+  onClose: () => void
+  onReadyToConfirm: (e: PendingEvent) => void
+}) {
+  const { travelers, currentTraveler } = useStore()
   const [title, setTitle] = useState('')
   const [subtitle, setSubtitle] = useState('')
   const [time, setTime] = useState('09:00')
   const [travelerId, setTravelerId] = useState(currentTraveler.id)
 
-  const handleSubmit = () => {
+  const handleNext = () => {
     if (!title.trim()) return
-    const traveler = travelers.find((t) => t.id === travelerId)!
-    addToCalendar({
-      date: selectedDate,
-      time,
-      title: title.trim(),
-      subtitle: subtitle.trim() || 'Evento adicionado',
-      travelerId,
-      color: traveler.color,
-    })
+    onReadyToConfirm({ title: title.trim(), subtitle: subtitle.trim(), time, travelerId })
   }
 
   return (
@@ -57,7 +66,6 @@ function AddEventModal({ onClose }: { onClose: () => void }) {
           </button>
         </div>
         <div className="bottom-sheet-body">
-          {/* Title */}
           <div className="form-group">
             <label className="form-label">Nome do evento</label>
             <input
@@ -70,31 +78,26 @@ function AddEventModal({ onClose }: { onClose: () => void }) {
             />
           </div>
 
-          {/* Subtitle */}
           <div className="form-group">
             <label className="form-label">Detalhes (opcional)</label>
             <input
               className="form-input"
               type="text"
-              placeholder="Ex: Reserva para 3 pessoas"
+              placeholder="Ex: Reserva para 6 pessoas"
               value={subtitle}
               onChange={(e) => setSubtitle(e.target.value)}
             />
           </div>
 
-          {/* Time */}
           <div className="form-group">
             <label className="form-label">Horário</label>
             <div style={{ position: 'relative' }}>
               <Clock
                 size={16}
                 style={{
-                  position: 'absolute',
-                  left: 16,
-                  top: '50%',
+                  position: 'absolute', left: 16, top: '50%',
                   transform: 'translateY(-50%)',
-                  color: 'var(--color-text-muted)',
-                  pointerEvents: 'none',
+                  color: 'var(--color-text-muted)', pointerEvents: 'none',
                 }}
               />
               <input
@@ -107,7 +110,6 @@ function AddEventModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
 
-          {/* Traveler selector */}
           <div className="form-group">
             <label className="form-label">Quem vai?</label>
             <div className="traveler-select">
@@ -116,15 +118,9 @@ function AddEventModal({ onClose }: { onClose: () => void }) {
                   key={t.id}
                   className={`traveler-option${travelerId === t.id ? ' selected' : ''}`}
                   onClick={() => setTravelerId(t.id)}
-                  style={
-                    travelerId === t.id
-                      ? {
-                          borderColor: t.color,
-                          background: `${t.color}15`,
-                          color: t.color,
-                        }
-                      : {}
-                  }
+                  style={travelerId === t.id
+                    ? { borderColor: t.color, background: `${t.color}15`, color: t.color }
+                    : {}}
                 >
                   <span
                     className="avatar avatar-sm"
@@ -140,11 +136,11 @@ function AddEventModal({ onClose }: { onClose: () => void }) {
 
           <button
             className="submit-btn"
-            onClick={handleSubmit}
+            onClick={handleNext}
             disabled={!title.trim()}
             style={{ opacity: title.trim() ? 1 : 0.5 }}
           >
-            Adicionar ao roteiro
+            Próximo — Confirmar
           </button>
         </div>
       </div>
@@ -162,27 +158,67 @@ export default function Calendar() {
     selectedDate,
     setSelectedDate,
     travelers,
+    addToCalendar,
     removeFromCalendar,
     showToast,
+    currentTraveler,
   } = useStore()
 
   const [showAddModal, setShowAddModal] = useState(false)
+  const [pendingEvent, setPendingEvent] = useState<PendingEvent | null>(null)
+  const [notifying, setNotifying] = useState(false)
 
   const dayItems = calendarItems
     .filter((item) => item.date === selectedDate)
     .sort((a, b) => a.time.localeCompare(b.time))
 
   const hasItemsOnDate = (date: string) => calendarItems.some((i) => i.date === date)
-
   const getTravelerById = (id: string) => travelers.find((t) => t.id === id)
+
+  const selectedDay = TRIP_DAYS.find((d) => d.date === selectedDate)
+  const tripDayIndex = TRIP_DAYS.findIndex((d) => d.date === selectedDate)
+  const tideCity = getCityForDate(selectedDate)
 
   const handleRemove = (id: string, title: string) => {
     removeFromCalendar(id)
     showToast(`"${title}" removido do roteiro`)
   }
 
-  const selectedDay = TRIP_DAYS.find((d) => d.date === selectedDate)
-  const tripDayIndex = TRIP_DAYS.findIndex((d) => d.date === selectedDate)
+  // Step 1: user fills form → moves to confirm step
+  const handleReadyToConfirm = (event: PendingEvent) => {
+    setShowAddModal(false)
+    setPendingEvent(event)
+  }
+
+  // Step 2: user confirms → add to store + notify group
+  const handleConfirm = async () => {
+    if (!pendingEvent) return
+    const traveler = travelers.find((t) => t.id === pendingEvent.travelerId) ?? currentTraveler
+
+    setNotifying(true)
+
+    addToCalendar({
+      date: selectedDate,
+      time: pendingEvent.time,
+      title: pendingEvent.title,
+      subtitle: pendingEvent.subtitle || 'Evento adicionado',
+      travelerId: pendingEvent.travelerId,
+      color: traveler.color,
+    })
+
+    // Notify group across all channels
+    await notifyAll({
+      title: pendingEvent.title,
+      message: `${traveler.name} adicionou "${pendingEvent.title}" ao roteiro do dia ${selectedDay?.number}/04 às ${pendingEvent.time}.`,
+      travelerName: traveler.name,
+      date: selectedDate,
+      time: pendingEvent.time,
+    })
+
+    setNotifying(false)
+    setPendingEvent(null)
+    showToast(`"${pendingEvent.title}" adicionado! Grupo notificado. ✓`)
+  }
 
   return (
     <>
@@ -198,16 +234,14 @@ export default function Calendar() {
             </div>
           </div>
           <div className="header-actions">
-            <span
-              style={{
-                padding: '4px 12px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--color-primary)',
-                color: 'white',
-                fontSize: 'var(--font-size-xs)',
-                fontWeight: 700,
-              }}
-            >
+            <span style={{
+              padding: '4px 12px',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--color-primary)',
+              color: 'white',
+              fontSize: 'var(--font-size-xs)',
+              fontWeight: 700,
+            }}>
               Abr 2026
             </span>
           </div>
@@ -224,16 +258,13 @@ export default function Calendar() {
             >
               <span className="day-weekday">{day.weekday}</span>
               <span className="day-number">{day.number}</span>
-              <span
-                style={{
-                  fontSize: 9,
-                  fontWeight: 600,
-                  opacity: selectedDate === day.date ? 0.85 : 0.55,
-                  color: selectedDate === day.date ? 'white' : 'var(--color-text-muted)',
-                  letterSpacing: '0.02em',
-                  textTransform: 'uppercase',
-                }}
-              >
+              <span style={{
+                fontSize: 9, fontWeight: 600,
+                opacity: selectedDate === day.date ? 0.85 : 0.55,
+                color: selectedDate === day.date ? 'white' : 'var(--color-text-muted)',
+                letterSpacing: '0.02em',
+                textTransform: 'uppercase',
+              }}>
                 {day.label}
               </span>
               {hasItemsOnDate(day.date) && <span className="day-dot" />}
@@ -241,6 +272,9 @@ export default function Calendar() {
           ))}
         </div>
       </div>
+
+      {/* Tide Widget */}
+      <TideWidget date={selectedDate} city={tideCity} />
 
       {/* Timeline */}
       <div className="timeline">
@@ -261,17 +295,11 @@ export default function Calendar() {
             const isLast = index === dayItems.length - 1
             return (
               <div key={item.id} className="timeline-item">
-                {/* Time column */}
                 <div className="timeline-time-col">
                   <span className="timeline-time">{item.time}</span>
                   {!isLast && <span className="timeline-line" />}
                 </div>
-
-                {/* Card */}
-                <div
-                  className="timeline-card"
-                  style={{ borderLeftColor: item.color }}
-                >
+                <div className="timeline-card" style={{ borderLeftColor: item.color, position: 'relative' }}>
                   <div className="timeline-card-body">
                     <div className="timeline-card-title">{item.title}</div>
                     <div className="timeline-card-sub">{item.subtitle}</div>
@@ -287,31 +315,16 @@ export default function Calendar() {
                       )}
                     </div>
                   </div>
-
-                  {/* Thumbnail if present */}
                   {item.imageUrl && (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.title}
-                      className="timeline-card-img"
-                      loading="lazy"
-                    />
+                    <img src={item.imageUrl} alt={item.title} className="timeline-card-img" loading="lazy" />
                   )}
-
-                  {/* Remove button */}
                   <button
                     onClick={() => handleRemove(item.id, item.title)}
                     style={{
-                      position: 'absolute',
-                      top: 8,
-                      right: 8,
-                      width: 24,
-                      height: 24,
-                      borderRadius: '50%',
+                      position: 'absolute', top: 8, right: 8,
+                      width: 24, height: 24, borderRadius: '50%',
                       background: 'var(--color-surface-alt)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: 'var(--color-text-muted)',
                     }}
                     aria-label={`Remover ${item.title}`}
@@ -324,23 +337,14 @@ export default function Calendar() {
           })
         )}
 
-        {/* Summary row */}
         {dayItems.length > 0 && (
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--space-3)',
-              padding: 'var(--space-4) var(--space-2)',
-              color: 'var(--color-text-muted)',
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 'var(--space-3)',
+            padding: 'var(--space-4) var(--space-2)',
+            color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)',
+          }}>
             <User size={14} />
-            <span>
-              {dayItems.length} atividade{dayItems.length > 1 ? 's' : ''} planejada
-              {dayItems.length > 1 ? 's' : ''}
-            </span>
+            <span>{dayItems.length} atividade{dayItems.length > 1 ? 's' : ''} planejada{dayItems.length > 1 ? 's' : ''}</span>
           </div>
         )}
       </div>
@@ -354,8 +358,57 @@ export default function Calendar() {
         <Plus size={24} />
       </button>
 
-      {/* Add Event Modal */}
-      {showAddModal && <AddEventModal onClose={() => setShowAddModal(false)} />}
+      {/* Step 1 — Formulário */}
+      {showAddModal && (
+        <AddEventModal
+          onClose={() => setShowAddModal(false)}
+          onReadyToConfirm={handleReadyToConfirm}
+        />
+      )}
+
+      {/* Step 2 — Confirmação + Notificação */}
+      {pendingEvent && !notifying && (
+        <ConfirmModal
+          title={pendingEvent.title}
+          subtitle={pendingEvent.subtitle}
+          time={pendingEvent.time}
+          date={selectedDate}
+          traveler={travelers.find((t) => t.id === pendingEvent.travelerId) ?? currentTraveler}
+          onConfirm={handleConfirm}
+          onCancel={() => setPendingEvent(null)}
+        />
+      )}
+
+      {/* Sending overlay */}
+      {notifying && (
+        <>
+          <div className="modal-overlay" style={{ zIndex: 250 }} />
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 251,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              background: 'var(--color-surface)',
+              borderRadius: 'var(--radius-lg)',
+              padding: 'var(--space-8) var(--space-10)',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)',
+              boxShadow: 'var(--shadow-lg)',
+            }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: '50%',
+                border: '3px solid var(--color-primary)',
+                borderTopColor: 'transparent',
+                animation: 'spin 0.8s linear infinite',
+              }} />
+              <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Notificando o grupo…
+              </span>
+            </div>
+          </div>
+        </>
+      )}
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   )
 }
