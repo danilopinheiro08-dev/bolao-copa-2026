@@ -82,7 +82,14 @@ export default function Restaurants() {
                 loading="lazy"
               />
               <div className="premium-card-body">
-                <span className="premium-card-category">{r.cuisine}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span className="premium-card-category">{r.cuisine}</span>
+                  {r.description.startsWith('Sugestão do grupo') && (
+                    <span style={{ fontSize: 9, fontWeight: 700, background: '#FEF3C7', color: '#D97706', padding: '1px 6px', borderRadius: 'var(--radius-full)', textTransform: 'uppercase' as const }}>
+                      💬 Sugestão
+                    </span>
+                  )}
+                </div>
                 <span className="premium-card-name">{r.name}</span>
                 <p style={{
                   fontSize: 'var(--font-size-sm)',

@@ -78,9 +78,12 @@ interface AppState {
    ============================================================ */
 
 const travelers: Traveler[] = [
-  { id: '1', name: 'Dan e Jeni', initials: 'DJ', color: '#0EA5E9', role: 'Grupo 1' },
-  { id: '2', name: 'Rod e Jeh', initials: 'RJ', color: '#FF6B6B', role: 'Grupo 2' },
-  { id: '3', name: 'Gil e Joh', initials: 'GJ', color: '#10B981', role: 'Grupo 3' },
+  { id: '1', name: 'Danilo',     initials: 'DA', color: '#0EA5E9', role: 'Organizador' },
+  { id: '2', name: 'Jenifer',    initials: 'JE', color: '#FF6B6B', role: 'Viajante' },
+  { id: '3', name: 'Gilmarques', initials: 'GI', color: '#10B981', role: 'Viajante' },
+  { id: '4', name: 'Joseane',    initials: 'JO', color: '#F59E0B', role: 'Viajante' },
+  { id: '5', name: 'Rodrigo',    initials: 'RO', color: '#8B5CF6', role: 'Viajante' },
+  { id: '6', name: 'Jessica',    initials: 'JS', color: '#EC4899', role: 'Viajante' },
 ]
 
 const destinations: Destination[] = [
@@ -172,6 +175,40 @@ const destinations: Destination[] = [
     imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80',
     description: 'Charming pousada com vista para o mar, piscina infinity e café da manhã incluso.',
   },
+  // ── Sugestões do grupo ──
+  {
+    id: 'd9',
+    name: 'Praia de Redinha',
+    category: 'Praia',
+    city: 'Natal',
+    rating: 4.6,
+    distance: '18 km',
+    priceLevel: '$',
+    imageUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=400&q=80',
+    description: 'Sugestão do grupo · Praia calma e ótima para ir com crianças, famosa pelo sururu e pelo visual do Rio Potengi.',
+  },
+  {
+    id: 'd10',
+    name: 'Praia do Forte',
+    category: 'Praia',
+    city: 'Natal',
+    rating: 4.7,
+    distance: '5 km',
+    priceLevel: '$',
+    imageUrl: 'https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?w=400&q=80',
+    description: 'Sugestão do grupo · Praia urbana de águas tranquilas, ideal para famílias. Próxima ao Forte dos Reis Magos.',
+  },
+  {
+    id: 'd11',
+    name: 'Mercado do Peixe',
+    category: 'Cultura',
+    city: 'Natal',
+    rating: 4.5,
+    distance: '7 km',
+    priceLevel: '$',
+    imageUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=80',
+    description: 'Sugestão do grupo · Comer a ginga com tapioca — experiência gastronômica típica de Natal que não pode faltar!',
+  },
 ]
 
 const restaurants: Restaurant[] = [
@@ -240,6 +277,29 @@ const restaurants: Restaurant[] = [
     priceLevel: '$$',
     imageUrl: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400&q=80',
     description: 'Rodízio premium com cortes nobres, vista para a praia de Tambaú ao entardecer.',
+  },
+  // ── Sugestões do grupo ──
+  {
+    id: 'r7',
+    name: 'Restaurante Bidoca',
+    cuisine: 'Regional',
+    city: 'Natal',
+    rating: 4.6,
+    distance: 'Natal/RN',
+    priceLevel: '$$',
+    imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400&q=80',
+    description: 'Sugestão do grupo · Culinária nordestina autêntica em ambiente aconchegante.',
+  },
+  {
+    id: 'r8',
+    name: 'Ô Bar Praia',
+    cuisine: 'Bar & Petiscos',
+    city: 'Natal',
+    rating: 4.5,
+    distance: 'Natal/RN',
+    priceLevel: '$$',
+    imageUrl: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80',
+    description: 'Sugestão do grupo · Bar à beira-mar em Natal/RN com petiscos e vista panorâmica para o oceano.',
   },
 ]
 

@@ -80,15 +80,32 @@ interface PremiumCardProps {
   rating: number
   distance: string
   priceLevel: string
+  isSuggestion?: boolean
   onAdd: () => void
 }
 
-function PremiumCard({ imageUrl, name, category, rating, distance, priceLevel, onAdd }: PremiumCardProps) {
+function PremiumCard({ imageUrl, name, category, rating, distance, priceLevel, isSuggestion, onAdd }: PremiumCardProps) {
   return (
     <div className="premium-card">
       <img src={imageUrl} alt={name} className="premium-card-img" loading="lazy" />
       <div className="premium-card-body">
-        <span className="premium-card-category">{category}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span className="premium-card-category">{category}</span>
+          {isSuggestion && (
+            <span style={{
+              fontSize: 9,
+              fontWeight: 700,
+              background: '#FEF3C7',
+              color: '#D97706',
+              padding: '1px 6px',
+              borderRadius: 'var(--radius-full)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}>
+              💬 Sugestão
+            </span>
+          )}
+        </div>
         <span className="premium-card-name">{name}</span>
         <div className="premium-card-meta">
           <span className="rating">
@@ -259,6 +276,7 @@ export default function Home() {
                 rating={d.rating}
                 distance={d.distance}
                 priceLevel={d.priceLevel}
+                isSuggestion={d.description.startsWith('Sugestão do grupo')}
                 onAdd={() => handleAddDestination(d.name)}
               />
             ))}
@@ -285,6 +303,7 @@ export default function Home() {
                 rating={r.rating}
                 distance={r.distance}
                 priceLevel={r.priceLevel}
+                isSuggestion={r.description.startsWith('Sugestão do grupo')}
                 onAdd={() => handleAddDestination(r.name)}
               />
             ))}
