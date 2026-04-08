@@ -3,18 +3,20 @@ import { Plus, CalendarDays, X, Clock, User } from 'lucide-react'
 import { useStore } from '../store/useStore'
 
 /* ============================================================
-   TRIP DAYS — May 12–19, 2026
+   TRIP DAYS — April 10–19, 2026 · JPA → Natal → Pipa → JP → JPA
    ============================================================ */
 
 const TRIP_DAYS = [
-  { date: '2026-05-12', weekday: 'Ter', number: 12 },
-  { date: '2026-05-13', weekday: 'Qua', number: 13 },
-  { date: '2026-05-14', weekday: 'Qui', number: 14 },
-  { date: '2026-05-15', weekday: 'Sex', number: 15 },
-  { date: '2026-05-16', weekday: 'Sáb', number: 16 },
-  { date: '2026-05-17', weekday: 'Dom', number: 17 },
-  { date: '2026-05-18', weekday: 'Seg', number: 18 },
-  { date: '2026-05-19', weekday: 'Ter', number: 19 },
+  { date: '2026-04-10', weekday: 'Sex', number: 10, label: 'Chegada' },
+  { date: '2026-04-11', weekday: 'Sáb', number: 11, label: 'Natal' },
+  { date: '2026-04-12', weekday: 'Dom', number: 12, label: 'Natal' },
+  { date: '2026-04-13', weekday: 'Seg', number: 13, label: 'Natal' },
+  { date: '2026-04-14', weekday: 'Ter', number: 14, label: 'Pipa' },
+  { date: '2026-04-15', weekday: 'Qua', number: 15, label: 'Pipa' },
+  { date: '2026-04-16', weekday: 'Qui', number: 16, label: 'JP' },
+  { date: '2026-04-17', weekday: 'Sex', number: 17, label: 'JP' },
+  { date: '2026-04-18', weekday: 'Sáb', number: 18, label: 'JP' },
+  { date: '2026-04-19', weekday: 'Dom', number: 19, label: 'Volta' },
 ]
 
 /* ============================================================
@@ -191,7 +193,7 @@ export default function Calendar() {
             <div className="page-title">Roteiro</div>
             <div className="trip-month">
               {selectedDay
-                ? `Dia ${tripDayIndex + 1} de ${TRIP_DAYS.length} · Natal, Pipa & JP`
+                ? `${selectedDay.label} · Dia ${tripDayIndex + 1} de ${TRIP_DAYS.length}`
                 : 'Selecione um dia'}
             </div>
           </div>
@@ -206,7 +208,7 @@ export default function Calendar() {
                 fontWeight: 700,
               }}
             >
-              Mai 2026
+              Abr 2026
             </span>
           </div>
         </div>
@@ -218,10 +220,22 @@ export default function Calendar() {
               key={day.date}
               className={`day-item${selectedDate === day.date ? ' active' : ''}`}
               onClick={() => setSelectedDate(day.date)}
-              aria-label={`Dia ${day.number}`}
+              aria-label={`Dia ${day.number} - ${day.label}`}
             >
               <span className="day-weekday">{day.weekday}</span>
               <span className="day-number">{day.number}</span>
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 600,
+                  opacity: selectedDate === day.date ? 0.85 : 0.55,
+                  color: selectedDate === day.date ? 'white' : 'var(--color-text-muted)',
+                  letterSpacing: '0.02em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {day.label}
+              </span>
               {hasItemsOnDate(day.date) && <span className="day-dot" />}
             </button>
           ))}

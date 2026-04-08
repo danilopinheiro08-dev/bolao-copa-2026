@@ -78,9 +78,9 @@ interface AppState {
    ============================================================ */
 
 const travelers: Traveler[] = [
-  { id: '1', name: 'Danilo', initials: 'DA', color: '#0EA5E9', role: 'Organizador' },
-  { id: '2', name: 'Carol', initials: 'CA', color: '#FF6B6B', role: 'Viajante' },
-  { id: '3', name: 'Lucas', initials: 'LU', color: '#10B981', role: 'Viajante' },
+  { id: '1', name: 'Dan e Jeni', initials: 'DJ', color: '#0EA5E9', role: 'Grupo 1' },
+  { id: '2', name: 'Rod e Jeh', initials: 'RJ', color: '#FF6B6B', role: 'Grupo 2' },
+  { id: '3', name: 'Gil e Joh', initials: 'GJ', color: '#10B981', role: 'Grupo 3' },
 ]
 
 const destinations: Destination[] = [
@@ -243,76 +243,177 @@ const restaurants: Restaurant[] = [
   },
 ]
 
-// Upcoming trip dates: May 12–19, 2026
+// Trip: April 10–19, 2026 · JPA → Natal → Pipa → João Pessoa → JPA
 const calendarItems: CalendarItem[] = [
+  // ── 10/04 (Sex) · SAÍDA DE JPA ──────────────────────────────
   {
-    id: 'c1',
-    date: '2026-05-12',
+    id: 'c01',
+    date: '2026-04-10',
+    time: '08:00',
+    title: 'Saída de João Pessoa',
+    subtitle: 'Trânsito JPA → Natal · 173 km · aprox. 02h45',
+    travelerId: '1',
+    color: '#0EA5E9',
+  },
+  {
+    id: 'c02',
+    date: '2026-04-10',
     time: '14:00',
-    title: 'Chegada em Natal',
-    subtitle: 'Aeroporto Internacional Augusto Severo',
+    title: 'Check In — Coral Plaza Hotel',
+    subtitle: 'Natal/RN · Check In após às 14:00 · Noite 1',
     travelerId: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=200&q=80',
     color: '#0EA5E9',
   },
+
+  // ── 11/04 (Sáb) · NATAL — NOITE 2 ──────────────────────────
   {
-    id: 'c2',
-    date: '2026-05-13',
+    id: 'c03',
+    date: '2026-04-11',
     time: '09:00',
-    title: 'Praia de Ponta Negra',
-    subtitle: 'Banho de mar + Morro do Careca',
+    title: 'Passeio: Rio do Fogo',
+    subtitle: 'Natal/RN · Noite 2 · Coral Plaza',
     travelerId: '1',
-    imageUrl: 'https://images.unsplash.com/photo-1519046904884-53103b34b206?w=200&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80',
     color: '#0EA5E9',
   },
+
+  // ── 12/04 (Dom) · NATAL — NOITE 3 ──────────────────────────
   {
-    id: 'c3',
-    date: '2026-05-13',
-    time: '12:30',
-    title: 'Camarões Restaurante',
-    subtitle: 'Almoço — reserva para 3 pessoas',
-    travelerId: '2',
-    imageUrl: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=200&q=80',
-    color: '#FF6B6B',
+    id: 'c04',
+    date: '2026-04-12',
+    time: '09:00',
+    title: 'Passeio a definir (?)',
+    subtitle: 'Natal/RN · Noite 3 · Coral Plaza',
+    travelerId: '1',
+    color: '#0EA5E9',
   },
+
+  // ── 13/04 (Seg) · NATAL — NOITE 4 + CHECK OUT ───────────────
   {
-    id: 'c4',
-    date: '2026-05-14',
-    time: '07:00',
-    title: 'Passeio de Buggy',
-    subtitle: 'Dunas de Genipabu ao nascer do sol',
+    id: 'c05',
+    date: '2026-04-13',
+    time: '08:00',
+    title: 'Quadriciclo ou Buggy — Dunas',
+    subtitle: 'Natal/RN · Antes do Check Out',
     travelerId: '1',
     imageUrl: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=200&q=80',
     color: '#0EA5E9',
   },
   {
-    id: 'c5',
-    date: '2026-05-15',
-    time: '10:00',
-    title: 'Praia de Pipa',
-    subtitle: 'Snorkel + observação de golfinhos',
-    travelerId: '3',
-    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80',
-    color: '#10B981',
+    id: 'c06',
+    date: '2026-04-13',
+    time: '12:00',
+    title: 'Check Out — Coral Plaza Hotel',
+    subtitle: 'Natal/RN · Check Out até às 12:00 · Noite 4',
+    travelerId: '1',
+    color: '#0EA5E9',
   },
+
+  // ── 14/04 (Ter) · TRÂNSITO NATAL → PIPA ─────────────────────
   {
-    id: 'c6',
-    date: '2026-05-16',
-    time: '11:00',
-    title: 'Centro Histórico JP',
-    subtitle: 'Visita guiada às igrejas barrocas',
-    travelerId: '2',
-    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80',
+    id: 'c07',
+    date: '2026-04-14',
+    time: '13:00',
+    title: 'Trânsito: Natal → Pipa',
+    subtitle: 'Coral Plaza → Serhs Villas Pipa · 82 km · 01h40',
+    travelerId: '1',
     color: '#FF6B6B',
   },
   {
-    id: 'c7',
-    date: '2026-05-16',
-    time: '19:30',
-    title: 'Mangai Restaurante',
-    subtitle: 'Jantar nordestino — para todos',
+    id: 'c08',
+    date: '2026-04-14',
+    time: '15:00',
+    title: 'Check In — Serhs Villas de Pipa Hotel',
+    subtitle: 'Pipa/RN · Check In após às 15:00 · Noite 5',
     travelerId: '1',
-    imageUrl: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=200&q=80',
-    color: '#0EA5E9',
+    imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=200&q=80',
+    color: '#FF6B6B',
+  },
+
+  // ── 15/04 (Qua) · PIPA — NOITE 6 + CHECK OUT ────────────────
+  {
+    id: 'c09',
+    date: '2026-04-15',
+    time: '09:00',
+    title: 'Passeio em Pipa',
+    subtitle: 'Pipa/RN · Noite 6 · Aqui faz mais sentido',
+    travelerId: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=200&q=80',
+    color: '#FF6B6B',
+  },
+  {
+    id: 'c10',
+    date: '2026-04-15',
+    time: '15:00',
+    title: 'Check Out — Serhs Villas de Pipa Hotel',
+    subtitle: 'Pipa/RN · Check Out até às 15:00',
+    travelerId: '1',
+    color: '#FF6B6B',
+  },
+
+  // ── 16/04 (Qui) · TRÂNSITO PIPA → JOÃO PESSOA ───────────────
+  {
+    id: 'c11',
+    date: '2026-04-16',
+    time: '15:30',
+    title: 'Trânsito: Pipa → João Pessoa',
+    subtitle: 'Serhs Villas → Jardins Almare · 155 km · 02h30',
+    travelerId: '1',
+    color: '#10B981',
+  },
+  {
+    id: 'c12',
+    date: '2026-04-16',
+    time: '18:00',
+    title: 'Check In — Jardins Almare Apart Hotel',
+    subtitle: 'João Pessoa/PB · Check In após às 15:00 · Noite 7',
+    travelerId: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=200&q=80',
+    color: '#10B981',
+  },
+
+  // ── 17/04 (Sex) · JOÃO PESSOA — NOITE 8 ─────────────────────
+  {
+    id: 'c13',
+    date: '2026-04-17',
+    time: '09:00',
+    title: 'Passeio em João Pessoa',
+    subtitle: 'João Pessoa/PB · Noite 8 · Aqui faz mais sentido',
+    travelerId: '1',
+    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200&q=80',
+    color: '#10B981',
+  },
+
+  // ── 18/04 (Sáb) · JOÃO PESSOA — NOITE 9 + CHECK OUT ─────────
+  {
+    id: 'c14',
+    date: '2026-04-18',
+    time: '09:00',
+    title: 'Passeio a definir (?)',
+    subtitle: 'João Pessoa/PB · Noite 9',
+    travelerId: '1',
+    color: '#10B981',
+  },
+  {
+    id: 'c15',
+    date: '2026-04-18',
+    time: '12:00',
+    title: 'Check Out — Jardins Almare Apart Hotel',
+    subtitle: 'João Pessoa/PB · Check Out até às 12:00',
+    travelerId: '1',
+    color: '#10B981',
+  },
+
+  // ── 19/04 (Dom) · VOLTA PARA JPA ────────────────────────────
+  {
+    id: 'c16',
+    date: '2026-04-19',
+    time: '12:30',
+    title: 'Trânsito: JP → JPA · Volta para casa',
+    subtitle: 'Jardins Almare → JPA · 23 km · aprox. 00h35',
+    travelerId: '1',
+    color: '#10B981',
   },
 ]
 
@@ -327,7 +428,7 @@ export const useStore = create<AppState>((set, get) => ({
   restaurants,
   calendarItems,
   currentPage: 'home',
-  selectedDate: '2026-05-12',
+  selectedDate: '2026-04-10',
   activeCategory: 'Todos',
   showProfileModal: false,
   showAddModal: false,
