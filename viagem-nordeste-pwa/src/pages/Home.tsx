@@ -15,6 +15,9 @@ import {
 } from 'lucide-react'
 import { useStore } from '../store/useStore'
 import ProfileModal from '../components/ProfileModal'
+import WeatherWidget from '../components/WeatherWidget'
+import RouteMap from '../components/RouteMap'
+import EmergencyContacts from '../components/EmergencyContacts'
 
 /* ============================================================
    DATA
@@ -67,6 +70,27 @@ const BANNERS = [
     badgeText: '#FFFFFF',
     imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
   },
+]
+
+const MOCK_HOTELS = [
+  {
+    id: 'h1',
+    name: 'Serhs Natal Grand Hotel',
+    imageUrl: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80',
+    category: 'Resort 5 Estrelas',
+    rating: 4.8,
+    distance: 'Beira-mar (Via Costeira)',
+    priceLevel: '$$$$'
+  },
+  {
+    id: 'h2',
+    name: 'Boutique Hotel Pipa',
+    imageUrl: 'https://images.unsplash.com/photo-1549294413-26f195200c16?w=600&q=80',
+    category: 'Pousada Boutique',
+    rating: 4.9,
+    distance: '300m do centro',
+    priceLevel: '$$$'
+  }
 ]
 
 /* ============================================================
@@ -184,6 +208,11 @@ export default function Home() {
           Viagem: Natal
           <ChevronDown size={14} color="var(--color-text-muted)" />
         </button>
+        <div style={{ paddingLeft: '22px', marginTop: '2px' }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-primary)' }}>
+            Faltam 12 dias! ✈️
+          </span>
+        </div>
 
         <div className="header-right">
           <button className="icon-btn" aria-label="Notificações">
@@ -212,6 +241,11 @@ export default function Home() {
             aria-label="Busca"
           />
         </div>
+      </section>
+
+      {/* Weather & Ocean Widget */}
+      <section className="px-6">
+        <WeatherWidget />
       </section>
 
       {/* Categories */}
@@ -310,6 +344,37 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      {/* Hotels Feed */}
+      {(activeCategory === 'Todos' || activeCategory === 'Hotéis') && (
+        <section>
+          <div className="section-header">
+            <span className="section-title">Onde se hospedar</span>
+          </div>
+          <div className="feed-section">
+            {MOCK_HOTELS.map((h) => (
+              <PremiumCard
+                key={h.id}
+                imageUrl={h.imageUrl}
+                name={h.name}
+                category={h.category}
+                rating={h.rating}
+                distance={h.distance}
+                priceLevel={h.priceLevel}
+                onAdd={() => handleAddDestination(h.name)}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Route Map */}
+      <section className="px-6 mt-4">
+        <RouteMap />
+      </section>
+
+      {/* Emergency Contacts */}
+      <EmergencyContacts />
 
       {/* Profile Modal */}
       {showProfileModal && <ProfileModal />}

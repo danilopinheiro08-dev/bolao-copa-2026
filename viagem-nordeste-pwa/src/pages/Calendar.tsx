@@ -5,6 +5,8 @@ import TideWidget from '../components/TideWidget'
 import ConfirmModal from '../components/ConfirmModal'
 import { getCityForDate } from '../services/tideService'
 import { notifyAll } from '../services/notificationService'
+import QrShareModal from '../components/QrShareModal'
+import { Share2 } from 'lucide-react'
 
 /* ============================================================
    TRIP DAYS — April 10–19, 2026 · JPA → Natal → Pipa → JP → JPA
@@ -165,6 +167,7 @@ export default function Calendar() {
   } = useStore()
 
   const [showAddModal, setShowAddModal] = useState(false)
+  const [showQrModal, setShowQrModal] = useState(false)
   const [pendingEvent, setPendingEvent] = useState<PendingEvent | null>(null)
   const [notifying, setNotifying] = useState(false)
 
@@ -233,7 +236,19 @@ export default function Calendar() {
                 : 'Selecione um dia'}
             </div>
           </div>
-          <div className="header-actions">
+          <div className="header-actions" style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            <button 
+              onClick={() => setShowQrModal(true)}
+              style={{
+                width: 32, height: 32, borderRadius: '50%',
+                background: 'var(--color-surface)', display: 'flex', 
+                alignItems: 'center', justifyContent: 'center',
+                boxShadow: 'var(--shadow-sm)', color: 'var(--color-primary)'
+              }}
+              aria-label="Compartilhar Roteiro"
+            >
+              <Share2 size={16} />
+            </button>
             <span style={{
               padding: '4px 12px',
               borderRadius: 'var(--radius-full)',
@@ -407,6 +422,13 @@ export default function Calendar() {
           </div>
         </>
       )}
+
+      {/* QR Code Modal */}
+      <QrShareModal 
+        isOpen={showQrModal} 
+        onClose={() => setShowQrModal(false)} 
+        url="https://viagem-nordeste-pwa.vercel.app/calendar" 
+      />
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
